@@ -1,6 +1,7 @@
 <h1> Zadanie1 </h1>
 
 Autor: Samuel Schmidt
+
 AIS id: 103120
 
 Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa štruktúry opísanej na obrázku v zadaní.
@@ -12,6 +13,7 @@ Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa št
 <a href="https://github.com/schmidt-8/PDT/tree/main/Zadanie_1" target="_blank">GitHub odkaz</a>
 
 Raw link: https://github.com/schmidt-8/PDT/tree/main/Zadanie_1
+GitHub classroom: https://github.com/FIIT-DBS/zadanie-pdt-schmidt-8
 
 <h2>Opis algoritmu</h2>
 V mojom riešení som postupoval následovne. Najskôr som si rozbalil dané .gz súbory pomocou scriptu gun_zip.py. Ako výsledok tohto

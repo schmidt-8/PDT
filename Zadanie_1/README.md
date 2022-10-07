@@ -9,6 +9,7 @@ Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa št
 <h2>Github odkaz</h2>
 <a href="https://github.com/schmidt-8/PDT/tree/main/Zadanie_1" target="_blank">GitHub odkaz</a>
 
+Raw link: https://github.com/schmidt-8/PDT/tree/main/Zadanie_1
 
 <h2>Opis algoritmu</h2>
 V mojom riešení som postupoval následovne. Najskôr som si rozbalil dané .gz súbory pomocou scriptu gun_zip.py. Ako výsledok tohto

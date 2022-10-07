@@ -1,4 +1,4 @@
-<h1> Zadanie1
+<h1> Zadanie1 </h1>
 
 Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa štruktúry opísanej na obrázku v zadaní.
 <img src="images/diagram.jpg" alt="Diagram">

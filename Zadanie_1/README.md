@@ -3,7 +3,7 @@
 Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa štruktúry opísanej na obrázku v zadaní.
 <img src="images/diagram.jpg" alt="Diagram">
 
-<h2>Opis algoritmu
+<h2>Opis algoritmu</h2>
 V mojom riešení som postupoval následovne. Najskôr som si rozbalil dané .gz súbory pomocou scriptu gun_zip.py. Ako výsledok tohto
 scriptu boli súbory authors.jsonl a conversations.jsonl. Rozhodol som sa postupovať tak že tieto súbory prejdem záznam po zázname,
 vytvorím z nich .csv súbory ktoré následne pomocou SQL príkazu COPY vkladám do jednotlivých tabuliek. 
@@ -20,14 +20,14 @@ Validácia záznamov sa taktiež odohráva v tomto scripte, čo znamená že do 
 
 Jedinečnosť pre záznamy (vyhnutie sa duplikátom) som riešil pomocou slovníkov. Tento prístup som zvolil najmä preto, že slovníky majú najrychlejšiu dobu prístupu (O(1)), aj keď v prípade python slovníkov je táto zložitosť o niečo vyššia, je stále rychlejšia ako kontrola cez SQL príkazy.
 
-<h3>Obmedzenia
+<h3>Obmedzenia</h3>
 V mojom riešení som chcel pôvodne implementovať volanie querys z tohto scriptu no nepodarilo sa mi rozbehať psycopg modul na mojom počítači, ktorý je potrebný na pripojenie k databáze a možnosť volať query z kódu, preto samotné querys sú púštané manuálne cez pgAdmin. V sekcii SQL je však uvedené celá query, ktorá keď sa spustí už s vygenerovanými .csv súbormi, vytvorí a naplní všetky tabuľky v DB (súbor SQL/postgre_query.sql).
 
 Pri vytváraní .csv súborov z conversations mi nastal problém, a to ten že sa mi záhadne stratilo 25 záznamov z conversations - ich ID boli evidované v dictionaries ale vo výslednom .csv súbore chýbali. 3 dni som strávil nad touto problematikou a nenasiel žiaden dôvod, prečo by sa malo toto diať (aj keď som zapisoval do dictionary hneď po tom, čo som zapísal záznam). Najväčšou záhadou ostalo to, že dané záznamy neboli zahodené úplne nakoľko sa vytvorili záznamy do ostatných tabuliek z príslušných záznamov a jediný záznam, ktorý sa nevytvoril bol do tabuľky conversations.
 
 Pre tento problém nastal potom problém s ostatnými tabuľkami, kde sa záznamy odkazovali na neexistujúci záznam do tabuľky conversations. Tento problém som teda riešil pomocou dočasných tabuliek, kde sa najskôr naplnia záznamy z .csv súborov bez kontroly cudzích kľúčov a potom pomocou inner joinu nad conversations.id a cudzich kľúčov v tabuľkách som do oficiálnych tabuliek vložil len záznamy s platným cudzím kľúčom. 
 
-<h2>Použité technológie
+<h2>Použité technológie</h2>
 -gzip na otvorenie súborov s veľkými dátami
 -slovníky na odstránenie duplikátov = rýchlejšia kontrola ako v tabuľkách
 -datetime na meranie času
@@ -38,8 +38,8 @@ Pre tento problém nastal potom problém s ostatnými tabuľkami, kde sa záznam
 -INNER JOIN pre odstránenie bugu vzniknutom pri stratení 25 conversations záznamov niekde medzi nebom a zemou.
 
 -pôvodný plán bol využiť aj sqlalchemy pre spúštanie querys z kódu
-<h2>SQL
-<h3>Príklad SQL query pre vytvorenie tabuliek
+<h2>SQL</h2>
+<h3>Príklad SQL query pre vytvorenie tabuliek</h3>
 
 ~~~~sql
 CREATE TABLE IF NOT EXISTS public.conversations
@@ -65,14 +65,14 @@ ALTER TABLE public.conversations
 ~~~~
 
 
-<h3>Príklad SQL query pre dropnutie pomocných tabuliek
+<h3>Príklad SQL query pre dropnutie pomocných tabuliek</h3>
 
 ~~~~sql
 DROP TABLE public.temp_conversation_references CASCADE;
 ~~~~
 
 
-<h3>Príklad SQL query pre import csv súboru
+<h3>Príklad SQL query pre import csv súboru</h3>
 Pre import .csv súborov do DB som zvolil príkaz COPY, nakoľko je rýchlejší ako ich vkladať cez INSERT a SELECT. 
 
 ~~~~sql
@@ -82,7 +82,7 @@ DELIMITER ';'
 CSV HEADER;
 ~~~~
 
-<h3>SQL query pre import do tabuliek odkazujúcich sa na neexistujúce záznamy
+<h3>SQL query pre import do tabuliek odkazujúcich sa na neexistujúce záznamy</h3>
 Pri prekopírovaní záznamov z pomocných tabuliek najskôr vypnem triggers pre cudzie kľúče, nakoľko mi tento problém vyrieši samotný INNER JOIN. Potom vložím len záznamy ktoré sa odkazujú na existujúci záznam v tabuľke conversations. Na samom konci opäť zapnem triggers a tým ostane podmienka odkazovania sa na záznamy do conversations pre prípadné ďalšie inserty zachovaná.
 
 Vypínanie triggers sa prejavilo ako veľmi efektívne pri INSERT najmä preto, že postgre DB nemusí kontrolovať pri vkladaní záznamov, či sú správne (zabezpečuje to INNER JOIN)
@@ -97,7 +97,7 @@ INNER JOIN public.conversations AS c1 ON temp_conversation_hashtags.conversation
 ALTER TABLE public.conversation_hashtags ENABLE TRIGGER ALL;
 ~~~~
 
-<h3>SQL query pre výpis veľkosti tabuliek a počtu záznamov
+<h3>SQL query pre výpis veľkosti tabuliek a počtu záznamov</h3>
 
 ~~~~sql
 SELECT 'none' as count, pg_size_pretty( pg_database_size('pdt') ) as table_size, '_size' as table_name UNION
@@ -114,7 +114,7 @@ SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('
 SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('links') ) as table_size, 'links' as table_name FROM public.links ORDER BY table_name;
 ~~~~
 
-<h3>Kompletná SQL query
+<h3>Kompletná SQL query</h3>
 Vo výsledku mám takúto query, ktorá keď sa zavolá po skončení import_db.py vytvorí a naplní všetky tabuľky podľa schémy.
 
 ~~~~sql
@@ -567,11 +567,11 @@ DROP TABLE public.temp_annotations CASCADE;
 
 
 
-<h2>Časy
+<h2>Časy</h2>
 Nakoľko som v mojom riešení použil COPY príkaz, nebolo možné sledovať import záznamov do DB po každých 10k záznamov. Priložil som však 3 csv súbory, z nich súbory time_authors a time_conversations obsahujú časové záznamy pri spracovaní každých 100k záznamov. Nakoľko som dané query spúšťal manuálne, súbor time_querys obsahuje časy, za aké jednotlivé query zbehli (výpisy z pgAdmina).
 
 Celá konverzia záznamov trvala približne 1 hod 8 minút. Vytvorenie naplnenie tabuliek a dropnutie pomocných tabuliek trvalo 2 hod a 32 minút. Celé riešenie, ktoré som implementoval má teda odhadovanú dobu trvania 3 hodiny a 40 minút. 
 
-<h2>Počet a veľkosť záznamov
+<h2>Počet a veľkosť záznamov</h2>  
 
 <img src="images/tables.png" alt="Veľkosť a počet záznamov">

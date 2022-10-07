@@ -1,5 +1,7 @@
 <h1> Zadanie1 </h1>
 
+Autor: Samuel Schmidt
+AIS id: 103120
 
 Cieľom zadania bolo importovať dáta veľkého rozsahu do databázy podľa štruktúry opísanej na obrázku v zadaní.
 

@@ -1,0 +1,12 @@
+SELECT 'none' as count, pg_size_pretty( pg_database_size('pdt') ) as table_size, '_size' as table_name UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('annotations') ) as table_size,'annotations' as table_name FROM public.annotations UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('authors') ) as table_size,'authors' as table_name FROM public.authors UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('context_annotations') ) as table_size,'context_annotations' as table_name FROM public.context_annotations UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('context_domains') ) as table_size,'context_domains' as table_name FROM public.context_domains UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('context_entities') ) as table_size,'context_entities' as table_name FROM public.context_entities UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('conversation_hashtags') ) as table_size,'conversation_hashtags' as table_name FROM public.conversation_hashtags UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('conversation_references') ) as table_size,'conversation_references' as table_name FROM public.conversation_references UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('conversations') ) as table_size,'conversations' as table_name FROM public.conversations UNION
+SELECT (round(count(*)/32300000.0 * 100))::varchar(255) as count, 'none' as table_size, '_percentage' as table_name FROM public.conversations UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('hashtags') ) as table_size,'hashtags' as table_name FROM public.hashtags UNION
+SELECT count(*)::varchar(255) as count, pg_size_pretty( pg_total_relation_size('links') ) as table_size, 'links' as table_name FROM public.links ORDER BY table_name;

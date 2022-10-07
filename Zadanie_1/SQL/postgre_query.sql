@@ -1,0 +1,446 @@
+CREATE TABLE IF NOT EXISTS public.authors
+(
+	id bigint NOT NULL,
+	name character varying(255),
+	username character varying(255),
+	description text,
+	tweet_count integer,
+    followers_count integer,
+    following_count integer,
+    listed_count integer,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.authors
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.conversations
+(
+    id bigint,
+    author_id bigint NOT NULL,
+    content text NOT NULL,
+    possibly_sensitive boolean NOT NULL,
+    language character varying NOT NULL,
+    source text NOT NULL,
+    retweet_count integer,
+    reply_count integer,
+    like_count integer,
+    quote_count integer,
+    created_at timestamp with time zone NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_author_id FOREIGN KEY (author_id)
+        REFERENCES public.authors (id)
+);
+
+ALTER TABLE public.conversations
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.hashtags
+(
+    id bigint NOT NULL,
+    tag text NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT tag_unique UNIQUE (tag) 
+);
+
+ALTER TABLE public.hashtags
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.context_domains
+(
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.context_domains
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.context_entities
+(
+    id bigint NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.context_entities
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.conversation_hashtags
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    hashtag_id bigint NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_conversation_id FOREIGN KEY (conversation_id)
+        REFERENCES public.conversations (id),
+    CONSTRAINT fk_hashtag_id FOREIGN KEY (hashtag_id)
+        REFERENCES public.hashtags (id)
+);
+
+ALTER TABLE public.conversation_hashtags
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.context_annotations
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    context_domain_id bigint NOT NULL,
+    context_entity_id bigint NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_conversation_id FOREIGN KEY (conversation_id)
+        REFERENCES public.conversations (id),
+    CONSTRAINT fk_context_domain_id FOREIGN KEY (context_domain_id)
+        REFERENCES public.context_domains (id),
+    CONSTRAINT fk_context_entity_id FOREIGN KEY (context_entity_id)
+        REFERENCES public.context_entities (id)
+);
+
+ALTER TABLE public.context_annotations
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.annotations
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    value text NOT NULL,
+    type text NOT NULL,
+    probability numeric NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_conversation_id FOREIGN KEY (conversation_id)
+        REFERENCES public.conversations (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE public.annotations
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.links
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    url character varying NOT NULL,
+    title text,
+    description text,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_conversation_id FOREIGN KEY (conversation_id)
+        REFERENCES public.conversations (id)
+);
+
+ALTER TABLE public.links
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.conversation_references
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    parent_id bigint NOT NULL,
+    type character varying NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_conversation_id FOREIGN KEY (conversation_id)
+        REFERENCES public.conversations (id),
+    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id)
+        REFERENCES public.conversations (id)
+);
+
+ALTER TABLE public.conversation_references
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.temp_conversation_references
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    parent_id bigint NOT NULL,
+    type character varying NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.temp_conversation_references
+    OWNER to postgres;
+
+
+CREATE TABLE IF NOT EXISTS public.temp_conversation_hashtags
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    hashtag_id bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.temp_conversation_hashtags
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.temp_context_annotations
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    context_domain_id bigint NOT NULL,
+    context_entity_id bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.temp_context_annotations
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.temp_annotations
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    value text NOT NULL,
+    type text NOT NULL,
+    probability numeric NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.temp_annotations
+    OWNER to postgres;
+
+CREATE TABLE IF NOT EXISTS public.temp_links
+(
+    id bigint NOT NULL,
+    conversation_id bigint NOT NULL,
+    url character varying NOT NULL,
+    title text,
+    description text,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE public.temp_links
+    OWNER to postgres;
+
+ALTER TABLE public.authors DISABLE TRIGGER ALL;
+ALTER TABLE public.conversations DISABLE TRIGGER ALL;
+ALTER TABLE public.context_domains DISABLE TRIGGER ALL;
+ALTER TABLE public.context_entities DISABLE TRIGGER ALL;
+ALTER TABLE public.hashtags DISABLE TRIGGER ALL;
+ALTER TABLE public.annotations DISABLE TRIGGER ALL;
+ALTER TABLE public.links DISABLE TRIGGER ALL;
+ALTER TABLE public.conversation_references DISABLE TRIGGER ALL;
+ALTER TABLE public.context_annotations DISABLE TRIGGER ALL;
+ALTER TABLE public.conversation_hashtags DISABLE TRIGGER ALL;
+
+
+COPY authors(id, name, username, description, tweet_count, followers_count, following_count, listed_count)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\authors_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_2.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_3.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_4.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_5.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_6.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations_7.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY hashtags(id, tag)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\hashtags_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY context_domains(id, name, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_domains_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY context_entities(id, name, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_entities_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_2.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_3.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_4.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_5.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags_6.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_2.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_3.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_4.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_5.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_6.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_7.csv'
+DELIMITER ';'
+CSV HEADER;
+
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_8.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations_9.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_annotations(id, conversation_id, value, type, probability)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\annotations_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_links(id, conversation_id, url, title, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\links_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_2.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_3.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_4.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_5.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references_6.csv'
+DELIMITER ';'
+CSV HEADER;
+
+
+INSERT INTO public.annotations 
+SELECT temp_annotations.* FROM public.temp_annotations 
+INNER JOIN public.conversations AS c1 ON temp_annotations.conversation_id=c1.id;
+
+INSERT INTO public.links 
+SELECT temp_links.* FROM public.temp_links
+INNER JOIN public.conversations AS c1 ON temp_links.conversation_id=c1.id;
+
+INSERT INTO public.conversation_references 
+SELECT temp_conversation_references.* FROM public.temp_conversation_references 
+INNER JOIN public.conversations AS c1 ON temp_conversation_references.conversation_id=c1.id
+INNER JOIN public.conversations AS c2 ON temp_conversation_references.parent_id=c2.id;
+
+INSERT INTO public.context_annotations 
+SELECT temp_context_annotations.* FROM public.temp_context_annotations
+INNER JOIN public.conversations AS c1 ON temp_context_annotations.conversation_id=c1.id;
+
+INSERT INTO public.conversation_hashtags 
+SELECT temp_conversation_hashtags.* FROM public.temp_conversation_hashtags
+INNER JOIN public.conversations AS c1 ON temp_conversation_hashtags.conversation_id=c1.id;
+
+
+ALTER TABLE public.authors ENABLE TRIGGER ALL;
+ALTER TABLE public.conversations ENABLE TRIGGER ALL;
+ALTER TABLE public.context_domains ENABLE TRIGGER ALL;
+ALTER TABLE public.context_entities ENABLE TRIGGER ALL;
+ALTER TABLE public.hashtags ENABLE TRIGGER ALL;
+ALTER TABLE public.annotations ENABLE TRIGGER ALL;
+ALTER TABLE public.conversation_hashtags ENABLE TRIGGER ALL;
+ALTER TABLE public.links ENABLE TRIGGER ALL;
+ALTER TABLE public.conversation_references ENABLE TRIGGER ALL;
+ALTER TABLE public.context_annotations ENABLE TRIGGER ALL;
+
+
+DROP TABLE public.temp_conversation_references CASCADE;
+DROP TABLE public.temp_context_annotations CASCADE;
+DROP TABLE public.temp_conversation_hashtags CASCADE;
+DROP TABLE public.temp_links CASCADE;
+DROP TABLE public.temp_annotations CASCADE;
+

@@ -1,0 +1,50 @@
+COPY authors(id, name, username, description, tweet_count, followers_count, following_count, listed_count)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\authors.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY conversations(id, author_id, content, possibly_sensitive, language, source, retweet_count, reply_count, like_count, quote_count, created_at)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversations.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY hashtags(id, tag)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\hashtags.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY context_domains(id, name, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_domains.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY context_entities(id, name, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_entities.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_hashtags(id, conversation_id, hashtag_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_hashtags.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_context_annotations(id, conversation_id, context_domain_id, context_entity_id)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\context_annotations.csv'
+DELIMITER ';'
+CSV HEADER;
+
+
+COPY temp_annotations(id, conversation_id, value, type, probability)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\annotations_1.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_links(id, conversation_id, url, title, description)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\links.csv'
+DELIMITER ';'
+CSV HEADER;
+
+COPY temp_conversation_references(id, conversation_id, parent_id, type)
+FROM 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_1\conversation_references.csv'
+DELIMITER ';'
+CSV HEADER;

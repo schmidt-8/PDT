@@ -1,0 +1,132 @@
+Geography: 4326
+Geometry: 3857
+2)
+-------------------------------
+SELECT name, substring(left(ST_ASTEXT(ST_Transform(St_GeomFromText(ST_AsText(way), 3857), 4326)),-2),10) as coordinates, way 
+FROM planet_osm_polygon WHERE admin_level='4';
+
+3)
+-------------------------------
+SELECT name, (ST_Area(St_Transform(way, 4326)::geography))/10^6 as area, way 
+FROM planet_osm_polygon WHERE admin_level='4' ORDER BY area;
+
+4)
+-------------------------------
+Budmerice:
+
+Insert into planet_osm_polygon (name, way)
+values ('house', ST_ASTEXT(ST_Transform(St_GeogFromText('SRID=4326; POLYGON((
+											  17.403444019918297 48.35877744587877,
+											  17.403519792324815 48.35872487002377,
+											  17.403624398478946 48.35877566364728,
+											  17.403541249997456 48.358829130564686, 
+											  17.403444019918297 48.35877744587877))')::geometry, 3857)));
+SELECT name, substring(left(ST_ASTEXT(ST_Transform(St_GeomFromText(ST_AsText(way), 3857), 4326)),-2),10) as coordinates, way 
+FROM planet_osm_polygon WHERE admin_level='4' or name = 'house';
+
+
+5)
+-------------------------------
+SELECT name FROM planet_osm_polygon
+join (select ST_ASTEXT(way) as way FROM planet_osm_polygon WHERE name = 'house') as house on ST_intersects(house.way, ST_ASTEXT(planet_osm_polygon.way))
+where planet_osm_polygon.admin_level = '4';
+
+6)
+-------------------------------
+Poloha:
+
+Insert into planet_osm_point (name, way)
+values ('my_location', ST_ASTEXT(ST_Transform(St_GeogFromText('SRID=4326; POINT(17.152118165605874 48.210158946305675)')::geometry, 3857)));
+
+
+7)
+-------------------------------
+SELECT ST_TOUCHES((select way FROM planet_osm_point WHERE name = 'my_location'), (select way FROM planet_osm_polygon WHERE name = 'house'));
+
+8)
+-------------------------------
+Geometry:
+SELECT ST_DISTANCE((select way FROM planet_osm_point WHERE name = 'my_location'), 
+				   (select way FROM planet_osm_polygon WHERE name = 'Fakulta informatiky a informačných technológií STU'));
+
+Geography <VZDUSNA CIARA skoro rovnaka>:
+SELECT ST_DISTANCE((select St_Transform(way, 4326)::geography FROM planet_osm_point WHERE name = 'my_location'), 
+				   (select St_Transform(way, 4326)::geography FROM planet_osm_polygon WHERE name = 'Fakulta informatiky a informačných technológií STU'));
+
+9)
+-------------------------------
+	
+
+10)
+-------------------------------
+WITH region as (Select name, way, (ST_Area(St_Transform(way, 4326)::geography))/10^6 as area
+				 FROM planet_osm_polygon 
+				 WHERE admin_level='8' AND ST_WITHIN(way, (SELECT way FROM planet_osm_polygon WHERE admin_level='2' and name='Slovensko'))
+				 ORDER BY area ASC 
+				 limit 1)
+				 
+SELECT region.name, ST_SRID(region.way), St_Transform(region.way, 4326)::geography, 
+ST_ASTEXT(
+	ST_transform(
+		ST_centroid((Select region.way FROM region)), 4326
+	)
+) as centroid FROM region;
+
+11)
+-------------------------------
+CREATE TABLE IF NOT EXISTS public.roads_MA_PE
+(
+    osm_id bigint,
+    name text COLLATE pg_catalog."default",
+    way geometry(LineString,3857)
+);
+
+ALTER TABLE public.planet_osm_roads
+    OWNER to postgres;
+
+CREATE INDEX MA_PE_roads_way_idx
+    ON public.roads_MA_PE USING gist
+    (way)
+    WITH (FILLFACTOR=100)
+    TABLESPACE pg_default;
+
+INSERT INTO roads_MA_PE(
+WITH border as(
+SELECT ST_TRANSFORM(ST_INTERSECTION(
+	(SELECT way FROM planet_osm_polygon WHERE admin_level = '8' and name = 'okres Malacky'),
+	(SELECT way FROM planet_osm_polygon WHERE admin_level = '8' and name = 'okres Pezinok')
+								   ),4326)::geography as transformed
+)
+SELECT osm_id, name, way FROM planet_osm_roads as roads
+join border on ST_DISTANCE(border.transformed,  ST_TRANSFORM(roads.way, 4326)::geography) < 10000);
+
+12)
+-------------------------------
+with road as(
+with region as(
+SELECT name, way FROM planet_osm_polygon
+join (select ST_ASTEXT(way) as house_way FROM planet_osm_polygon WHERE name = 'house') as house on ST_intersects(house.house_way, ST_ASTEXT(planet_osm_polygon.way))
+where planet_osm_polygon.admin_level = '8'
+)
+SELECT roads.way FROM planet_osm_roads as roads
+join region on ST_CONTAINS(region.way, roads.way) ORDER BY roads.way DESC limit 1
+)
+SELECT idn5 as id, nm5 as name, ST_TRANSFORM(ST_FORCE2D(kuku."Shape"),4326)::geography, ST_TRANSFORM(ST_FORCE2D(road.way),4326)::geography 
+FROM ku_0 as kuku
+join road on ST_INTERSECTS(road.way, ST_TRANSFORM(ST_FORCE2D(kuku."Shape"),3857)::geometry);
+
+13)
+-------------------------------
+with BA_area as (
+with Bratislava_okolie as(
+with Bratislava as(
+SELECT ST_UNION(way) as way FROM planet_osm_polygon WHERE admin_level = '8' and name like ('okres Bratislava%')
+)
+SELECT ST_SymDifference((ST_Transform(ST_GeomFromText(ST_ASTEXT(ST_BUFFER(ST_TRANSFORM(Bratislava.way,4326)::geography, 20000)), 4326), 3857)::geometry), Bratislava.way) as way
+FROM Bratislava 
+)
+SELECT ST_Intersection((Select Bratislava_okolie.way From Bratislava_okolie), SVK.way) as area
+FROM planet_osm_polygon as SVK
+WHERE name = 'Slovensko' and admin_level = '2'
+)
+SELECT ST_AREA(ST_TRANSFORM(BA_area.area, 4326)::geography)/10^6 as area, ST_TRANSFORM(BA_area.area, 4326)::geography FROM BA_area;

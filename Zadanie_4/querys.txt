@@ -1,0 +1,61 @@
+1
+call{
+match (a:Author)-[:TWEETED]->
+(t:Conversation)<-[reply:REPLIED_TO]-(:Conversation)
+WHERE a.username="ZelenskyyUa"
+ return a,t,count(reply) as reply_count
+ order by reply_count desc
+ limit 1}
+
+ match (hashtag:Hashtag) WHERE hashtag.tag = 'RussiaUkraineCrisis'
+create (t)<-[:RETWEETED]-(mytweet:Conversation{content: "My custom tweet"})-[:HAS]->(hashtag) 
+create (author:Author{name:'Sammy', username: 'sammysminx'})-[:TWEETED]->(mytweet)
+return author, t, mytweet, a, hashtag 
+
+-------------------------------------------
+2
+call{
+match (author:Author)-[:TWEETED]->(:Conversation)<-[:REPLIED_TO]-(reply:Conversation) 
+return author, count(reply) as most_reply_count
+order by most_reply_count desc
+limit 10
+}
+
+match (author)-[:TWEETED]->(tweet:Conversation)<-[:REPLIED_TO]-(rep:Conversation)
+return author, tweet, count(rep) as least_reply_count
+order by least_reply_count asc
+limit 20
+--------------------------------------------
+3
+match(marios:Author{username: "Marios59885699"})-[:TWEETED]->(:Conversation)-[:RETWEETED]->(:Conversation)<-[:RETWEETED*1..]-(tweet:Conversation)<-[:TWEETED]-(author:Author)
+where author.username <>  marios.username
+RETURN author, count(tweet) as most_retweets
+order by most_retweets desc
+limit 10 
+--------------------------------------------
+4
+match p = allShortestPaths((a1:Author{username:'ua_parliament'})-[:TWEETED|RETWEETED|QUOTED|REPLIED_TO*1..10]-(a2:Author{username: 'nexta_tv'})) return p
+--------------------------------------------
+5
+call{
+match p = allShortestPaths((a1:Author{username:'ua_parliament'})-[:TWEETED|RETWEETED|QUOTED|REPLIED_TO*1..10]-(a2:Author{username: 'nexta_tv'}))
+UNWIND p AS path
+UNWIND nodes(path) as elements
+RETURN elements}
+match (elements)<-[:TWEETED]-(a:Author) return elements, a
+--------------------------------------------
+6
+call{
+match (hashtag:Hashtag)<-[:HAS]-(tweet:Conversation)
+return hashtag, count(tweet) as count_hash
+order by count_hash desc
+limit 10}
+call{
+    with hashtag
+    match (hashtag)<-[:HAS]-(tweet:Conversation)<-[:TWEETED]-(author:Author)
+    return hashtag as finhash, count(tweet) as count_author, author
+    order by count_author desc
+    limit 1
+}
+return hashtag.tag, count_hash, author.name, count_author
+

@@ -1,0 +1,17 @@
+COPY( SELECT row_to_json (result) FROM (
+SELECT authors.*
+FROM authors WHERE '2022-02-24' in (SELECT created_at::date FROM conversations WHERE author_id = authors.id)
+GROUP BY authors.id LIMIT 5000
+) AS result
+) TO 'C:\Users\Samuel Schmidt\Desktop\Files\UNI\ING\1.rocnik_zimny\PDT\Zadanie_6\authors_5k.jsonl' WITH(HEADER FALSE);
+
+CREATE INDEX IF NOT EXISTS fk_index_1 ON public.conversations(author_id);
+CREATE INDEX IF NOT EXISTS fk_index_2 ON public.conversation_hashtags(conversation_id);
+CREATE INDEX IF NOT EXISTS fk_index_3 ON public.conversation_hashtags(hashtag_id);
+CREATE INDEX IF NOT EXISTS fk_index_4 ON public.context_annotations(conversation_id);
+CREATE INDEX IF NOT EXISTS fk_index_5 ON public.conversation_references(conversation_id);
+CREATE INDEX IF NOT EXISTS fk_index_6 ON public.conversation_references(parent_id);
+CREATE INDEX IF NOT EXISTS fk_index_7 ON public.annotations(conversation_id);
+CREATE INDEX IF NOT EXISTS fk_index_8 ON public.conversations(id);
+CREATE INDEX IF NOT EXISTS fk_index_9 ON public.links(conversation_id);
+CREATE INDEX IF NOT EXISTS fk_index_10 ON public.conversations(created_at);

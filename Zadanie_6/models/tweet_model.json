@@ -1,0 +1,46 @@
+{
+    "id": 1078758509397884930,
+    "author_id": 1023900821895950336,
+    "content": "You see BACK HOME we are big FAMOUS for work we do. Here in MISERABLE TINY ISLAND we are made IGNORED ☹️. Maybe if new REFERENDUM we not help AGAIN. United England no make LAUGHTER then! 🇷🇺💔🇬🇧 https://t.co/y5c6IgRSNf",
+    "possibly_sensitive": false,
+    "language": "en",
+    "source": "Twitter Web Client",
+    "retweet_count": 25,
+    "reply_count": 0,
+    "like_count": 34,
+    "quote_count": 1,
+    "created_at": "2018-12-28T21:04:05+00:00",
+    "hashtags": null,
+    "links": [
+        {
+            "url": "https://twitter.com/JuliaDavisNews/status/1078680196394479616",
+            "title": null,
+            "description": null
+        }
+    ],
+    "annotations": [
+        {
+            "type": "Place",
+            "value": "United England",
+            "probability": 0.8113
+        }
+    ],
+    "context_annotations": [
+        {
+            "domain": {
+                "name": "Person",
+                "description": "Named people in the world like Nelson Mandela"
+            },
+            "entity": {
+                "name": "Donald Trump",
+                "description": "45th US President, Donald Trump"
+            }
+        }
+    ],
+    "conversation_references": [
+        {
+            "parent_id": 1078680196394479616,
+            "type": "replied_to"
+        }
+    ]
+}
